@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+  <mapper namespace="signin">
+  
+  	<!-- 아이디 중복 확인 -->
+  	<select id="checkemail" resultType="java.lang.String">
+  		SELECT MEM FROM MEMBER WHERE MEM=#{mem}
+  	</select>
+  	
+  	<!-- 고유번호 가져오기 -->
+  	<select id="getMid" resultType="java.lang.String">
+  		SELECT MID FROM MEMBER WHERE MEM=#{mem}
+  	</select>
+
+  	<!-- 회원 가입 -->
+ 	<select id="insertMem" parameterType="java.util.HashMap" statementType="CALLABLE">
+		{ call SIGNUP(#{mem, mode=IN, jdbcType=VARCHAR},#{mpw, mode=IN, jdbcType=VARCHAR},
+		#{mname, mode=IN, jdbcType=VARCHAR},#{mnick, mode=IN, jdbcType=VARCHAR},
+		#{mage, mode=IN, jdbcType=INTEGER},#{maddr, mode=IN, jdbcType=VARCHAR},#{mpfimg, mode=IN, jdbcType=VARCHAR},
+		#{mchemail, mode=IN, jdbcType=VARCHAR}) }
+	</select>
+
+  	
+  <!-- 회원정보 수정 -->
+     <update id="updateMem" parameterType="java.util.HashMap" statementType="CALLABLE">
+         { CALL MINFO_UPDATE(#{mid, mode=IN, jdbcType=VARCHAR}, 
+         #{mpw, mode=IN, jdbcType=VARCHAR}, 
+         #{mnick, mode=IN, jdbcType=VARCHAR}, 
+         #{maddr, mode=IN, jdbcType=VARCHAR}, 
+         #{mchemail, mode=IN, jdbcType=VARCHAR},
+         #{mage, mode=IN, jdbcType=INTEGER},
+         #{mpfimg, mode=IN, jdbcType=VARCHAR}
+         ) }
+     </update>
+     
+     <resultMap id="rsmap" type="SelCVO.SigninVO">
+     	 <result column="MID" property="mid"/>
+         <result column="MEM" property="mem"/>
+         <result column="MPW" property="mpw"/>
+         <result column="MNAME" property="mname"/>
+         <result column="MNICK" property="mnick"/>
+         <result column="MAGE" property="mage"/>
+         <result column="MADDR" property="maddr"/>
+         <result column="MPFIMG" property="mpfimg"/>
+         <result column="MCHEMAIL" property="mchemail"/>
+     </resultMap>    
+     
+     <select id="modifyview" parameterType="java.lang.Integer" resultMap="rsmap">
+         SELECT M.MID, MEM, MPW, MNAME, MNICK, MAGE, MADDR, MPFIMG, MCHEMAIL FROM MEMBER M JOIN MINFO I ON M.MID = I.MID WHERE M.MID = #{mid}
+     </select>
+     
+     <!-- 회원정보 삭제 -->
+     <select id="deleteMem" parameterType="java.util.HashMap" statementType="CALLABLE">
+         { CALL DELETE_MEMBER(#{mid, mode=IN, jdbcType=VARCHAR}, #{mname, mode=OUT, jdbcType=VARCHAR}) }
+     </select>
+  </mapper>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+  <mapper namespace="login">
+  
+  	<!-- 로그인 -->
+  	<select id="login" parameterType="SelCVO.LoginVO" resultType="SelCVO.LoginVO">
+  		SELECT * FROM MEMBER WHERE MEM=#{mem} AND MPW=#{mpw}
+  	</select>
+  
+  	<!-- 임시비밀번호 부여 -->
+  	<update id="find_password" parameterType="SelCVO.LoginVO">
+  		UPDATE MEMBER SET MPW=#{mpw} WHERE MEM=#{mem}
+  	</update>
+  </mapper>

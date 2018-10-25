@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+  <mapper namespace="schedule">
+  
+  	<!-- 로그인 -->
+  	<select id="insertlog" parameterType="SelCVO.srchResultVO">
+  		INSERT INTO SEARCHLOG(SLCOST, SLSTART, SLLOC, SLEND, SLDIST, MID, CLCATID, CLID, ACATID) 
+  		VALUES(#{slcost},#{slstart},#{slloc},#{slend},#{sldist},#{mid},#{clcatid},#{clid},#{acatid})
+  	</select>
+  
+    <select id="insertSchedule" statementType="CALLABLE">
+      		{ CALL SCHEDULE_INSERT(
+  				#{clid, mode=IN, jdbcType=INTEGER},
+  				#{mid, mode=IN, jdbcType=VARCHAR},
+  				#{spreid, mode=IN, jdbcType=INTEGER},
+      			#{stitle, mode=IN, jdbcType=VARCHAR},
+      			#{schedule_start, mode=IN, jdbcType=VARCHAR},
+      			#{schedule_end, mode=IN, jdbcType=VARCHAR},
+				#{sid, mode=OUT, jdbcType=INTEGER}
+		)}
+   	</select>
+  
+  	<resultMap id="schedule_map" type="SelCVO.ScheduleVO"/>
+  	<resultMap id="stitle_map" type="java.lang.String"/>
+  	
+    <select id="getScheduleInfo" statementType="CALLABLE">
+      		{ CALL GET_SCHEDULE_INFO(
+  				#{clid, mode=IN, jdbcType=INTEGER},
+  				#{mid, mode=IN, jdbcType=VARCHAR},
+				#{cursor, mode=OUT, jdbcType=CURSOR, javaType=ResultSet, resultMap=schedule.schedule_map}
+		)}
+   	</select>
+
+    <select id="getScheduleInfo2" statementType="CALLABLE">
+      		{ CALL GET_SCHEDULE_INFO2(
+  				#{clid, mode=IN, jdbcType=INTEGER},
+				#{cursor, mode=OUT, jdbcType=CURSOR, javaType=ResultSet, resultMap=schedule.schedule_map}
+		)}
+   	</select>
+  	
+  	<select id="getScheduleList" statementType="CALLABLE">
+  			{ CALL GET_SCHEDULE_LIST(
+  				#{mid, mode=IN, jdbcType=INTEGER},
+  				#{schedule_cur, mode=OUT, jdbcType=CURSOR, javaType=ResultSet, resultMap=schedule.schedule_map},
+  				#{stitle_cur, mode=OUT, jdbcType=CURSOR, javaType=ResultSet, resultMap=schedule.stitle_map}
+  			)}
+  	</select>
+  	
+  	<select id="ScheduleId" resultType="java.lang.Integer">
+  		SELECT SID FROM SCHEDULE WHERE TITLE=#{stitle}
+  	</select>
+  	
+  	<select id="neSchedule" statementType="CALLABLE" resultType="SelCVO.ScheduleVO">
+		{ CALL GET_NESCHEDULE(
+  				#{spreid, mode=IN, jdbcType=INTEGER},
+  				#{schedule_cur, mode=OUT, jdbcType=CURSOR, javaType=ResultSet, resultMap=schedule.schedule_map})}
+  	</select>
+  	
+  	<select id="spSchedule" statementType="CALLABLE" resultType="SelCVO.ScheduleVO">
+  		{ CALL GET_SPSCHEDULE(
+  				#{sid, mode=IN, jdbcType=INTEGER},
+  				#{schedule_cur, mode=OUT, jdbcType=CURSOR, javaType=ResultSet, resultMap=schedule.schedule_map})}
+  	</select>
+  	
+  	<!-- 08-06 업데이트 -->
+  	<select id="getpath" resultType="java.lang.String">
+  		SELECT MPFIMG FROM MINFO WHERE MID = #{MID}
+  	</select>
+  	
+  	<select id="getAcatInfo" resultType="SelCVO.AcatinfoVO">
+  		SELECT * FROM
+			(SELECT AID, ANAME, ALOC, ACHLOG, AHITS, ACATNAME, AINFO, MEM FROM 
+				(SELECT AID, ANAME, ALOC, ACHLOG, AHITS, ACATNAME, AINFO, MID 
+				FROM ACADEMY JOIN ACAT 
+				USING(ACATID) 
+				WHERE AID=#{aid})
+			JOIN MEMBER USING(MID))
+		JOIN
+			(SELECT CLID, CLNAME, CLDAY, TO_CHAR(CLSTART, 'HH24:MM') CLSTART, TO_CHAR(CLEND, 'HH24:MM') CLEND, CCOST, AID, CLCATNAME, CLINFO 
+			FROM CLASS JOIN CLCAT 
+			USING(CLCATID))
+		USING(AID)
+  	</select>
+  	
+  	<update id="gainAhit">
+  		UPDATE ACADEMY SET AHITS=AHITS+1 WHERE AID=#{aid}
+  	</update>
+  	
+  	<select id="getClcmt" resultType="SelCVO.ClcmtVO">
+        SELECT MNICK, CLID, CLCID, MID, CLCCTX, CLCSCORE 
+        FROM CLCMT JOIN MINFO
+        USING(MID) 
+        WHERE CLID IN (SELECT CLID 
+        				FROM CLASS 
+        				WHERE AID =#{AID})
+        ORDER BY CLCID DESC
+    </select>
+     
+    <select id="insertCLCmt" parameterType="SelCVO.ClcmtVO">
+        INSERT INTO CLCMT(CLCID, CLCSCORE, CLCCTX, MID, CLID) 
+        VALUES(700||CLCMT_SEQ.NEXTVAL,#{clcscore},#{clcctx},#{mid},#{clid})
+    </select>
+     
+    <delete id="deleteCLCmt">
+        DELETE FROM CLCMT WHERE CLCID = #{CLCID}
+    </delete>
+  
+  </mapper>

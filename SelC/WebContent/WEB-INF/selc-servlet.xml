@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:mybatis-spring="http://mybatis.org/schema/mybatis-spring"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd
+		http://mybatis.org/schema/mybatis-spring http://mybatis.org/schema/mybatis-spring-1.2.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd">
+
+	<context:annotation-config />
+	<mvc:annotation-driven />
+	<context:property-placeholder location="classpath:DBprop.properties" />
+	<context:component-scan	base-package="SelCController" />
+	<context:component-scan base-package="SelCDB.spring.BIZ" />
+	<context:component-scan base-package="SelCDB.spring.DAO" />
+	<context:component-scan base-package="SelCDB.spring.Validator" />
+	<context:component-scan base-package="SelCDB.Jdbc.BIZ" />
+
+<!-- Controller에서 이동하는 거 -->
+	<bean id="viewResolver"
+		class="org.springframework.web.servlet.view.UrlBasedViewResolver">
+		<property name="viewClass"
+			value="org.springframework.web.servlet.view.JstlView" />
+		<property name="prefix" value="WEB-INF/view/" />
+		<property name="suffix" value=".jsp" />
+		<property name="contentType" value="text/html; charset=UTF-8" />
+	</bean>
+
+	<bean class="org.springframework.web.multipart.commons.CommonsMultipartResolver" id="multipartResolver">
+		<property value="5242880" name="maxUploadSize" />
+		<property value="UTF-8" name="defaultEncoding" />
+	</bean>
+
+<!-- DB에서 사용할 dataSource 정의-->
+	<bean name="dataSource"
+		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName" value="${jdbc.driver}"></property>
+		<property name="url" value="${jdbc.url}"></property>
+		<property name="username" value="${jdbc.username}"></property>
+		<property name="password" value="${jdbc.password}"></property>
+	</bean>
+
+<!-- Spring-myBatis에서 사용할 Beans 정의 -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="configLocation"	value="classpath:mybatis-config.xml" />
+		<property name="transactionFactory">
+			<bean class="org.mybatis.spring.transaction.SpringManagedTransactionFactory" />
+		</property>
+	</bean>
+	
+<!-- Spring-JDBC에서 사용할 Beans정의 -->
+	<bean id="dao" class="SelCDB.Jdbc.DAO.jdbcDao">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+</beans>

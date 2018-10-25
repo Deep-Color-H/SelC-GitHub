@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+  <mapper namespace="main">
+  	
+  	<select id="view_sch_list" resultType="SelCVO.BoardVO">
+  		SELECT BID, BTITLE, BRCM FROM (SELECT * FROM BOARD ORDER BY BRCM DESC) WHERE ROWNUM &lt;= 5 AND BCATID = 'BOARD_SCHEDULE'
+  	</select>
+  	
+  	<select id="view_board_list" resultType="SelCVO.BoardVO">
+  		SELECT BID, BTITLE, BRCM FROM (SELECT * FROM BOARD ORDER BY BRCM DESC) WHERE ROWNUM &lt;= 5 AND BCATID = 'BOARD_DIARY'
+  	</select>
+  	
+  </mapper>
